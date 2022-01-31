@@ -2,9 +2,11 @@
 
 Ejemplos de código para empezar a trabajar con sucesos *e+e- -> ZH*  (FCCee) 
 
-El objetivo es seguir este estudio sobre el recoil del Higgs: https://github.com/HEP-FCC/FCCeePhysicsPerformance/tree/ZH_recoil/case-studies/higgs/mH-recoil 
+El objetivo es seguir [este estudio sobre el recoil del Higgs] (https://github.com/HEP-FCC/FCCeePhysicsPerformance/tree/ZH_recoil/case-studies/higgs/mH-recoil)
 
 Vamos a reproducir los plots del recoil y de la masa del Z a partir de las muestras FCCee 'reducidas' creadas por Juan Alcaraz y almacenadas en las maquinas del CIEMAT.
+
+![](Plot_Recoil_mass.png?raw=true) ![](Plot_Z_mass.png?raw=true)  
 
 ###  Como correr los ejemplos
 
