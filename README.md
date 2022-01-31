@@ -22,7 +22,7 @@ git clone https://github.com/mcepeda/ExamplesFCCee.git
 cd ExamplesFCCee/
 ```
 
-Carga root
+Setup de root (necesario cada vez que abras sesión):
 ```
 source /cvmfs/sft.cern.ch/lcg/contrib/gcc/4.8/x86_64-centos7-gcc48-opt/setup.sh
 ```
