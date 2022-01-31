@@ -8,12 +8,12 @@ Vamos a reproducir los plots del recoil y de la masa del Z a partir de las muest
 
 ###  Como correr los ejemplos
 
-Desde una maquina ciemat conectate a las user interfaces 
+Desde una maquina ciemat hay que conectarse a las "user interfaces" del grupo de altas energias (gaeui 0X) en las que correremos: 
 ```
 ssh gaeui01   
 ```
 
-Descarga el codigo de este tutorial
+Descarga el código de este tutorial
 
 ```
 git clone https://github.com/mcepeda/ExamplesFCCee.git 
@@ -27,7 +27,7 @@ source /cvmfs/sft.cern.ch/lcg/contrib/gcc/4.8/x86_64-centos7-gcc48-opt/setup.sh
 
 Corre los ejemplos:
 
-a) Ejemplo con loops (programación clasica): 
+a) Ejemplo con loops (programación "clasica"): 
 
 ```
 python -i FirstSteps/plot_example_loop.py   
@@ -88,12 +88,16 @@ En estos root trees la informacion guardada es:
 -------------------------------------------------------------------------------------------
 ```
 
-### Paginas web utiles como referencia
+### Paginas web útiles como referencia
 
 Código: 
 - ROOT Get Started: https://root.cern/get_started/ 
 - Como trabajar con RDataFrames : https://root.cern/doc/master/classROOT_1_1RDataFrame.html 
 - Tutoriales de RDataFrames con Root: https://root.cern.ch/doc/master/group__tutorial__dataframe.html 
+
+FCCee full framework: 
+- https://github.com/HEP-FCC/FCCeePhysicsPerformance/tree/ZH_recoil/case-studies/higgs/mH-recoil 
+- https://github.com/HEP-FCC/FCCAnalyses 
 
 Física: 
 - Estudio sobre el recoil: https://indico.cern.ch/event/995850/contributions/4415989/attachments/2272945/3860610/ZHRecoilAnalysis_FCCWeek_29062021.pdf    
