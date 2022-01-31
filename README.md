@@ -47,10 +47,10 @@ Estos ejemplos están basados en
 - Fondo ZZ: e+e- ->ZZ  , /afs/ciemat.es/user/a/alcaraz/public/FCCee/eeZZ_skimmed_reduced.root	, cross section = 1.35899 pb
 - Fondo WW: e+e->WW , /afs/ciemat.es/user/a/alcaraz/public/FCCee/eeWW_skimmed_reduced.root ,  cross section = 16.4385 pb
 
-Son versiones 'reducidas' de muestras oficiales FCCee con 10M de sucesos generados con el detector IDEA a 240 GeV (/eos/experiment/fcc/ee/generation/DelphesEvents/spring2021/IDEA/p8_ee_ZH_ecm240/ y equivalentes ZZ y WW). Hay muestras FCCee más recientes pero son un buen punto de partida.
+Son versiones 'reducidas' de muestras oficiales FCCee con 10M de sucesos generados con el detector IDEA a 240 GeV (/eos/experiment/fcc/ee/generation/DelphesEvents/spring2021/IDEA/p8_ee_ZH_ecm240/ y equivalentes ZZ y WW). No son todos los fondos relevantes, y hay muestras FCCee más recientes (con mejor simulación), pero son un buen punto de partida.
 
 En estos root trees la informacion guardada es:
-
+```
 ------------------------------------------------------------------------------------
 "NMuon"                : Number of reconstructed muons in the event (int)
 "Muon_px"            : X-component of momentum of each muon (in GeV, vector of floats)
@@ -86,6 +86,7 @@ En estos root trees la informacion guardada es:
 "MCParticle_PDG"    : PDG id of the generated particle (int)
 "MCParticle_parent"    : index of parent particle (-1 if no parent, vector of ints)
 -------------------------------------------------------------------------------------------
+```
 
 ### Paginas web utiles como referencia
 
