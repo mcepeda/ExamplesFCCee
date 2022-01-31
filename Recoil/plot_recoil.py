@@ -107,7 +107,7 @@ hRecoilTheta={}
 for i in range(nProcesses):
    p = processes[i]
    hMass[p] = df[p].Histo1D(("Z_mass_{}".format(p), "Dimuon mass;m_{#mu#mu} (GeV);N_{Events}",80,70, 110), "Dimuon_mass")
-   hRecoil[p] = df[p].Histo1D(("Recoil_mass_{}".format(p), "Z leptonic recoil mass; m_{recoil} (GeV);N_{Events}",200,80, 180), "recoil")
+   hRecoil[p] = df[p].Histo1D(("Recoil_mass_{}".format(p), "Z leptonic recoil mass; m_{recoil} (GeV);N_{Events}",40,120, 140), "recoil")
 
    hZPt[p] = df[p].Histo1D(("Z_Pt_{}".format(p), "Dimuon Pt; Z Pt (GeV);N_{Events}",120,0, 120), "Dimuon_Pt")
    hRecoilPt[p] = df[p].Define("recoilPt","(p4total-DiMuon_p4).Pt()").Histo1D(("Recoil_Pt_{}".format(p), "Recoil Pt; Z recoil Pt (GeV);N_{Events}",100,0,120), "recoilPt")
