@@ -4,9 +4,9 @@ Ejemplos de código para empezar a trabajar con sucesos *e+e- -> ZH*  (FCCee)
 
 El objetivo es seguir [este estudio sobre el recoil del Higgs] (https://github.com/HEP-FCC/FCCeePhysicsPerformance/tree/ZH_recoil/case-studies/higgs/mH-recoil)
 
-Vamos a reproducir los plots del recoil y de la masa del Z a partir de las muestras FCCee 'reducidas' creadas por Juan Alcaraz y almacenadas en las maquinas del CIEMAT.
+Vamos a reproducir los plots de la masa del Z->MuMu y del 'retroceso' (recoil, el Higgs) a partir de las muestras FCCee 'reducidas' creadas por Juan Alcaraz y almacenadas en las maquinas del CIEMAT. 
 
-![](Plot_Recoil_mass.png?raw=true) ![](Plot_Z_mass.png?raw=true)  
+<img src="Plot_Z_mass.png?raw=true" width=400> <img src="Plot_Recoil_mass.png" width=400>   
 
 ###  Como correr los ejemplos
 
@@ -43,7 +43,7 @@ python -i FirstSteps/plot_example_dataframe.py
 
 ###  Información de las muestras:
 
-Estos ejemplos están basados en 
+Utilizariamos las siguientes muestras:
 
 - Señal:  e+e- ->ZH  , /afs/ciemat.es/user/a/alcaraz/public/FCCee/eeHZ_skimmed_reduced.root	, cross section = 0.201868 pb 
 - Fondo ZZ: e+e- ->ZZ  , /afs/ciemat.es/user/a/alcaraz/public/FCCee/eeZZ_skimmed_reduced.root	, cross section = 1.35899 pb
