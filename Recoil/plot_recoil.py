@@ -10,11 +10,6 @@ import os, sys, math
 import ROOT
 import multiprocessing
 
-import tdrstyle
-
-# CMS Style (estilo para los plots)
-tdrstyle.setTDRStyle()
-
 # Enable multi-threading (parallel processing, do not use more than 8 cores)
 maxcpus = multiprocessing.cpu_count()
 ROOT.EnableImplicitMT(min(maxcpus,8))
@@ -56,7 +51,7 @@ for i in range(nProcesses):
     df[p] = df[p].Define("Muon_pt","sqrt( pow(Muon_px,2)+pow(Muon_py,2) ) ")
     # Tambien queremos la energia del muon. E^2=M^2+P^2, aqui c=1. La masa es muy pequeña,
     # podriamos descartarla 
-    df[p] = df[p].Define("Muon_E","sqrt(pow(Muon_px,2)+pow(Muon_py,2)+pow(Muon_pz,2)+pow(0.105,2))")
+    df[p] = df[p].Define("Muon_E","sqrt(pow(Muon_px,2)+pow(Muon_py,2)+pow(Muon_pz,2)+pow(Muon_mass,2))")
 
     # A partir de los dos muones [0] y [1], vamos a reconstruir la masa invariante del par
     # de muones.  
@@ -112,7 +107,7 @@ hRecoilTheta={}
 for i in range(nProcesses):
    p = processes[i]
    hMass[p] = df[p].Histo1D(("Z_mass_{}".format(p), "Dimuon mass;m_{#mu#mu} (GeV);N_{Events}",80,70, 110), "Dimuon_mass")
-   hRecoil[p] = df[p].Histo1D(("Recoil_mass_{}".format(p), "Z leptonic recoil mass; m_{recoil} (GeV);N_{Events}",400,0, 200), "recoil")
+   hRecoil[p] = df[p].Histo1D(("Recoil_mass_{}".format(p), "Z leptonic recoil mass; m_{recoil} (GeV);N_{Events}",200,80, 180), "recoil")
 
    hZPt[p] = df[p].Histo1D(("Z_Pt_{}".format(p), "Dimuon Pt; Z Pt (GeV);N_{Events}",120,0, 120), "Dimuon_Pt")
    hRecoilPt[p] = df[p].Define("recoilPt","(p4total-DiMuon_p4).Pt()").Histo1D(("Recoil_Pt_{}".format(p), "Recoil Pt; Z recoil Pt (GeV);N_{Events}",100,0,120), "recoilPt")
