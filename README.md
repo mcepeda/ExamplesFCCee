@@ -2,9 +2,13 @@
 
 Ejemplos de código para empezar a trabajar con sucesos *e+e- -> ZH*  (FCCee) 
 
-El objetivo es seguir este estudio sobre el recoil del Higgs: https://github.com/HEP-FCC/FCCeePhysicsPerformance/tree/ZH_recoil/case-studies/higgs/mH-recoil 
+El objetivo es seguir [este estudio sobre el recoil del Higgs] (https://github.com/HEP-FCC/FCCeePhysicsPerformance/tree/ZH_recoil/case-studies/higgs/mH-recoil)
 
-Vamos a reproducir los plots del recoil y de la masa del Z a partir de las muestras FCCee 'reducidas' creadas por Juan Alcaraz y almacenadas en las maquinas del CIEMAT.
+Vamos a reproducir los plots de la masa del Z->MuMu y del 'retroceso' (recoil, el Higgs) a partir de las muestras FCCee 'reducidas' creadas por Juan Alcaraz y almacenadas en las maquinas del CIEMAT: 
+
+<img src="Plot_Z_mass.png?raw=true" width=400> <img src="Plot_Recoil_mass.png" width=400>   
+
+El primer paso es empezar a trabajar con las muestras: los primeros ejemplos son más simples. Producen un par de gráficas sencillas (Pt de los Muones, número de muones, etc). 
 
 ###  Como correr los ejemplos
 
@@ -20,9 +24,10 @@ git clone https://github.com/mcepeda/ExamplesFCCee.git
 cd ExamplesFCCee/
 ```
 
-Carga root
+Setup de root (necesario cada vez que abras sesión):
 ```
-source /cvmfs/sft.cern.ch/lcg/contrib/gcc/4.8/x86_64-centos7-gcc48-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc8-opt/setup.sh
+
 ```
 
 Corre los ejemplos:
@@ -38,10 +43,10 @@ b) Ejemplo con dataframes (este es tipo de programación que usaremos):
 python -i FirstSteps/plot_example_dataframe.py
 ```
 
-
+A partir de ellos iremos construyendo el análisis: primero incorporando variables mas complejas (la masa del Z, el recoil) y a continuación corriendo sobre diferentes muestras y normalizandolas a su sección eficaz. 
 ###  Información de las muestras:
 
-Estos ejemplos están basados en 
+Utilizariamos las siguientes muestras:
 
 - Señal:  e+e- ->ZH  , /afs/ciemat.es/user/a/alcaraz/public/FCCee/eeHZ_skimmed_reduced.root	, cross section = 0.201868 pb 
 - Fondo ZZ: e+e- ->ZZ  , /afs/ciemat.es/user/a/alcaraz/public/FCCee/eeZZ_skimmed_reduced.root	, cross section = 1.35899 pb
