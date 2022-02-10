@@ -2,7 +2,7 @@
 
 Ejemplos de código para empezar a trabajar con sucesos *e+e- -> ZH*  (FCCee) 
 
-El objetivo es seguir [este estudio sobre el recoil del Higgs] (https://github.com/HEP-FCC/FCCeePhysicsPerformance/tree/ZH_recoil/case-studies/higgs/mH-recoil)
+El objetivo es seguir [este estudio sobre el recoil del Higgs](https://github.com/HEP-FCC/FCCeePhysicsPerformance/tree/ZH_recoil/case-studies/higgs/mH-recoil)
 
 Vamos a reproducir los plots de la masa del Z->MuMu y del 'retroceso' (recoil, el Higgs) a partir de las muestras FCCee 'reducidas' creadas por Juan Alcaraz y almacenadas en las maquinas del CIEMAT: 
 
@@ -44,6 +44,7 @@ python -i FirstSteps/plot_example_dataframe.py
 ```
 
 A partir de ellos iremos construyendo el análisis: primero incorporando variables mas complejas (la masa del Z, el recoil) y a continuación corriendo sobre diferentes muestras y normalizandolas a su sección eficaz. 
+
 ###  Información de las muestras:
 
 Utilizariamos las siguientes muestras:
@@ -53,6 +54,18 @@ Utilizariamos las siguientes muestras:
 - Fondo WW: e+e->WW , /afs/ciemat.es/user/a/alcaraz/public/FCCee/eeWW_skimmed_reduced.root ,  cross section = 16.4385 pb
 
 Son versiones 'reducidas' de muestras oficiales FCCee con 10M de sucesos generados con el detector IDEA a 240 GeV (/eos/experiment/fcc/ee/generation/DelphesEvents/spring2021/IDEA/p8_ee_ZH_ecm240/ y equivalentes ZZ y WW). No son todos los fondos relevantes, y hay muestras FCCee más recientes (con mejor simulación), pero son un buen punto de partida.
+
+Para ver la evolución de la sección eficaz con la energía en centro de masas de la colisión:
+
+a)  [Secciones eficaces de e+e-->Higgs, sacadas de "Azzurri, P., Bernardi, G., Braibant, S. et al. A special Higgs challenge: measuring the mass and production cross section with ultimate precision at FCC-ee. Eur. Phys. J. Plus 137, 23 (2022)"](https://link.springer.com/article/10.1140/epjp/s13360-021-02202-4)
+
+[<img src="HiggsXsec.png?raw=true" width=800>](https://link.springer.com/article/10.1140/epjp/s13360-021-02202-4)
+
+b) [Incluyendo los fondos: secciones eficaces de e+e-, sacadas de "Precision Physics at CEPC, Fenfen An et al 2019 Chinese Phys. C 43 043002"](https://iopscience.iop.org/article/10.1088/1674-1137/43/4/043002)
+
+[<img src="cpc_43_4_043002_f9.jpg?raw=true" width=500>](https://iopscience.iop.org/article/10.1088/1674-1137/43/4/043002]])
+
+
 
 En estos root trees la informacion guardada es:
 ```
