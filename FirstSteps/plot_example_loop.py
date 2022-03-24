@@ -40,7 +40,7 @@ hMuon_px.SetYTitle("Sucesos / GeV")
 # Pinta los histogramas
 hMuon_px.Draw("hist")
 
-#Leyenda del histograma. Importante para saber que estás pintando.
+#Leyenda del histograma. Importante para saber que estas pintando.
 legend=TLegend(0.5,0.7,0.90,0.90) # (posInicio_x, posInicio_y, posFin_x, posFin_y)
 legend.AddEntry(hMuon_px,"Muones","l")
 legend.Draw()

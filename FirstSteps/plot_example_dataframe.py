@@ -43,13 +43,13 @@ dfMuons = df.Filter("NMuon == 2", "Events with exactly two muons")
 report = dfMuons.Report()
 report.Print()
 
-# Tambien podemos añadir variables. 
+# Tambien podemos anadir variables. 
 # Dada la geometria del detector es comodo trabajar en cilindricas 
 # en vez de cartesianas: vamos a definir el momento del muon en el plano transverso y
-# añadirlo al dataframe: 
+# anadirlo al dataframe: 
 dfMuons = dfMuons.Define("Muon_pt","sqrt( pow(Muon_px,2)+pow(Muon_py,2) ) ")
 
-# Vamos a volver a imprimir sucesos: ahora puedes ver que está ahi el Pt
+# Vamos a volver a imprimir sucesos: ahora puedes ver que esta ahi el Pt
 dfMuons.Display({"Muon_px","Muon_py","Muon_pz","Muon_pt","Muon_charge"},10 ).Print()
 
 

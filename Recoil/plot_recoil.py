@@ -84,13 +84,27 @@ for i in range(nProcesses):
     df[p] = df[p].Define("Dimuon_Pt", "DiMuon_p4.Pt()")
 
     # Filtramos en la masa del Z:
-    df[p] = df[p].Filter("Dimuon_mass>80 && Dimuon_mass<100","80 < Mreco(dimuon) < 100 GeV")
+    df[p] = df[p].Filter("Dimuon_mass>86 && Dimuon_mass<96","86 < Mreco(dimuon) < 96 GeV")
+
+    # Filtramos en el pt del Z:
+    df[p] = df[p].Filter("Dimuon_Pt>20 && Dimuon_Pt<70","20<Dimuon PT <70 GeV")
 
     # Reconstruimos el recoil, que corresponde a la masa del Higgs:
     df[p] = df[p].Define("p4total","ROOT::Math::PxPyPzEVector(0.,0.,0.,240.)")
     df[p] = df[p].Define("recoil","(p4total-DiMuon_p4).M()")
 
-#    df[p].Display({"Muon_pt","Muon_charge","Dimuon_mass","recoil"},30 ).Print()
+    # Filtramos en la masa del Recoil 
+    df[p] = df[p].Filter("recoil>120 && recoil<140", "120<M_{H}<140 GeV")
+
+    # Define missing momentum
+    df[p] = df[p].Define('Missing_e', ' sqrt( Missing_px*Missing_px+Missing_py*Missing_py+Missing_pz*Missing_pz )')
+
+    # El momento 'que falta', Missing Pt y su angulo cos(Theta_miss)
+    df[p] = df[p].Define('Missing_p4', "ROOT::Math::PxPyPzEVector(Missing_px,Missing_py,Missing_pz,Missing_e)")
+    df[p] = df[p].Define('Missing_costheta', 'abs(cos(Missing_p4.Theta()))')
+
+    # Filtramos en cos(theta_miss) - este de momento no lo vamos a activar
+    # df[p] = df[p].Filter("Missing_costheta<0.98", "cos(theta_miss)<0.98")
 
     print("CutFlow for process", sampleName[i])
     df[p].Report().Print()	
@@ -112,6 +126,8 @@ hZTheta={}
 hRecoilTheta={}
 hNMuons={}
 hNElectrons={}
+hCosRecoilTheta={}
+hCosMissEtTheta={}
 
 # Rellenamos histogramas: 
 
@@ -140,7 +156,9 @@ for i in range(nProcesses):
    hNMuons[p] = df[p].Histo1D(("NMuons_{}".format(p), "NMuons;N_{#mu};N_{Events}",5,0, 5), "NMuon")
    hNElectrons[p] = df[p].Histo1D(("NElectrons_{}".format(p), "NElectrons;N_{e};N_{Events}",5,0, 5),"NElectron")
 
+   hCosRecoilTheta[p] = df[p].Define("cos_recoil_Theta","abs(cos((p4total-DiMuon_p4).Theta()))").Histo1D(("cos_Recoil_theta_{}".format(p), "cos (Recoil Theta); cos(#theta_{recoil});N_{Events}",100,0,1), "cos_recoil_Theta")
 
+   hCosMissEtTheta[p] = df[p].Histo1D( ("cos_missing_theta_{}".format(p),"cos (Missing Momentum Theta); cos (#theta_{Miss}); N_{Events}",100,0,1), "Missing_costheta")
 
 
 # Salva los histogramas en un archivo root para pintarlos despues 
@@ -165,6 +183,6 @@ for p in processes:
    hRecoilTheta[p].Write()
    hNMuons[p].Write()
    hNElectrons[p].Write()
- 
-
+   hCosRecoilTheta[p].Write() 
+   hCosMissEtTheta[p].Write()
 

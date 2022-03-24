@@ -8,70 +8,74 @@ tdrstyle.setTDRStyle()
 
 file=ROOT.TFile("histos.root","READONLY")
 
-histos=["Z_mass","Recoil_mass","LeadMuon_Pt","LeadMuon_Theta","LeadMuon_Phi",\
-	"SecondMuon_Pt","SecondMuon_Theta","SecondMuon_Phi","Z_theta","Recoil_theta",\
-	"Z_Pt","Recoil_Pt","Z_y","Recoil_y"]
+#histos=["Z_mass","Recoil_mass","LeadMuon_Pt","LeadMuon_Theta","LeadMuon_Phi",\
+#	"SecondMuon_Pt","SecondMuon_Theta","SecondMuon_Phi","Z_theta","Recoil_theta",\
+#	"Z_Pt","Recoil_Pt","Z_y","Recoil_y","NMuons","NElectrons","cos_Recoil_theta",\
+#	"cos_missing_theta"] # para pintar todos a la vez
+
+histos=["Recoil_mass"] # para ir rapido, solo un plot
+
+# las muestras : 
+sampleName=["WW","ZZ","HZ"]
+nProcesses=len(sampleName)
+
+# Los factores de normalizacion de cada proceso vienen dados por la seccion eficaz:
+# eeHZ: 0.201868 pb
+# eeZZ: 1.35899  pb
+# eeWW: 16.4385  pb
+xsection=[16.4385,1.35899,0.201868]
+# Comentario a mi misma: para que esto fuese mas elegante, seria mejor haber hecho un mapa
+# o un diccionario (muestra-> seccion eficaz) 
+
+# Luminosidad acumulada: 5 ab-1 = 5000 fb-1 = 500000 pb-1
+luminosity = 5e6
+
+# Numero de sucesos MC producidos originamente.
+# En este caso todas las muestras originales tenian 10M de sucesos.
+totalNumberOfEvents=10000000
+
+# La normalizacion de los histogramas seguira :
+#  N_Sucesos = xsection * luminosidad
+#  Peso      = xsection * luminosidad / SucesosGenerados en total 
+
+# Color de los histogramas
+color=[ROOT.kBlue+1,ROOT.kGreen+2,ROOT.kRed]
+
+# Definimos una funcion para dar estilo y normalizar los histogramas  
+def StyleHisto(sample,variab,histColor,xsec,suffix=""):
+     histo =file.Get(variab+"_ee"+sample)		
+     histo.SetName("h"+variab+"_ee"+sample+suffix)
+     # Estilo:
+     histo.SetLineColor(histColor)
+     if sample!="HZ":
+     	histo.SetFillColor(histColor)
+     histo.SetLineWidth(3)
+
+     # Aqui se aplica la normalizacion: 
+     histo.Scale(xsec*luminosity/totalNumberOfEvents)
+
+     return histo
 
 
 # Loop sobre los histogramas guardados en 'histos.root'
 
 for histoName in histos:
 
-   sampleName=["WW","ZZ","HZ"]
-   nProcesses=len(sampleName)
-   
-   # Los factores de normalizacion de cada proceso vienen dados por la seccion eficaz:
-   # eeHZ: 0.201868 pb
-   # eeZZ: 1.35899  pb
-   # eeWW: 16.4385  pb
-   xsection=[16.4385,1.35899,0.201868]
-   
-   # Luminosidad acumulada: 5 ab-1 = 5000 fb-1 = 500000 pb-1
-   luminosity = 5e6
-   
-   # Numero de sucesos MC producidos originamente: 
-   totalNumberOfEvents=10000000
-
-   # La normalizacion de los histogramas seguira :
-   #  N_Sucesos = xsection * luminosidad
-   #  Peso      = xsection * luminosidad / SucesosGenerados en total 
-   
-   # Color de los histogramas
-   color=[ROOT.kBlue+1,ROOT.kGreen+2,ROOT.kRed]
-
-   # Definimos una funcion para dar estilo y normalizar los histogramas  
-   def StyleHisto(sample,variab,histColor,xsec):
-        histo =file.Get(variab+"_ee"+sample)		
-	
-	# Estilo:
-        histo.SetLineColor(histColor)
-        if sample!="HZ":
-        	histo.SetFillColor(histColor)
-        histo.SetLineWidth(3)
-
-	# Aqui se aplica la normalizacion: 
-        histo.Scale(xsec*luminosity/totalNumberOfEvents)
-
-        return histo
-
 
    # Definimos un 'stack' de histogramas apilados:
    h={}
    hStack    = ROOT.THStack()
    
+   print ("YIELDS (from %s)" %histoName)
    for i in range(nProcesses):
          h[ sampleName[i] ] = StyleHisto(sampleName[i],histoName,color[i],xsection[i])
+         print ("... %s %2d" %(sampleName[i],h[ sampleName[i] ].Integral() ) )
+         # if sampleName[i]!="HZ" : # para pintar la señal por separado
          hStack.Add( h[ sampleName[i] ] )
 
 
    # Ahora pintamos los histogramas:
    c1 = ROOT.TCanvas("c1","HZ analysis canvas", 650,600)
-   
-#   ROOT.gStyle.SetPadGridX(True)
-#   ROOT.gStyle.SetPadGridY(True)
-#   ROOT.gStyle.SetGridStyle(3)
-#   ROOT.gStyle.SetHistLineWidth(3)
-#   ROOT.gStyle.SetHistMinimumZero()
    ROOT.gStyle.SetOptTitle(True)
    
    c1.SetTicks(1,1)
@@ -80,17 +84,20 @@ for histoName in histos:
    c1.SetTopMargin(0.06)
   
    hStack.Draw("hist")
-   
-   ylabel="Events"
+#   h["HZ"].Draw("hist,sames")	# Opcion para pintar la segnal por separado
+ 
+   ylabel="events"
    xlabel=h[sampleName[0]].GetXaxis().GetTitle() #"DiMuon Mass [GeV]"
    
    hStack.GetXaxis().SetTitle(xlabel)
    hStack.GetYaxis().SetTitle(ylabel)
    
-   hStack.GetYaxis().SetTitleOffset(1.8)
+   hStack.GetYaxis().SetTitleOffset(1.4)
    hStack.GetXaxis().SetTitleOffset(1.2)
 
-   maxY=hStack.GetMaximum() 
+   maxY=hStack.GetMaximum()
+   if h["HZ"].GetMaximum()> maxY:
+      maxY=h["HZ"].GetMaximum() 
    hStack.SetMaximum(maxY*1.2)
  
    # Leyenda
