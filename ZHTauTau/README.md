@@ -11,5 +11,17 @@ El algoritmo de reconstruccion de taus es un prototipo y esta en desarrollo.
 
 <img src="MuMuTauTau_collmass_example.png" width=400> <img src="QQTauTau_collmass_example.png " width=400>
 
+Los ultimos trees estan en las gaeui0X, en "/nfs/cms/cepeda/FCC/taus16Feb_eekt4Jets_idInJet/"
+
+Ejemplo MuMuTauTau:
+
+```
+# To create the histograms:
+python runMuMuTauTau.py 
+
+# To make the plots:
+python pintarMuMuTauTau.py
+```
+
 
 
