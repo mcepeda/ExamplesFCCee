@@ -6,20 +6,20 @@ tdrstyle.setTDRStyle()
 
 # Carga el archivo con los histogramas
 
-file=ROOT.TFile("histosMuMuTauTau.root","READONLY")
+file=ROOT.TFile("histos.root","READONLY")
 
 #histos=["Z_mass","Z_Pt","Recoil_mass","DiTau_vis_mass","DiTau_coll_mass","CutFlow"] 
 
 # muchos mas...
 histos=["Z_mass","Recoil_mass","DiTau_vis_mass","DiTau_coll_mass","LeadMuon_Pt","SecondMuon_Pt","LeadMuon_Theta","SecondMuon_Theta",
-	"LeadMuon_Phi","SecondMuon_Phi","LeadTau_Pt","SecondTau_Pt","LeadTau_Theta","SecondTau_Theta","LeadTau_Phi","SecondTau_Phi",
+	"LeadMuon_Phi","SecondMuon_Phi","LeadTau_Pt","ElectronLead_Pt","LeadTau_Theta","ElectronLead_Theta","LeadTau_Phi","ElectronLead_Phi",
         "Z_Pt","DiTau_Pt","Recoil_Pt","Z_y","Recoil_y","Z_theta","Recoil_theta","NMuons","NElectrons","cos_missing_theta",
-	"LeadTau_Type","LeadTau_Mass","SecondTau_Type","SecondTau_Mass",
-	"NJets","JetTauID","JetPt","JetNChargedHad","JetNConst","JetNPhotons","JetNNeutralHad","NTauFromJets","CutFlow"]
+	"LeadTau_Type","LeadTau_Mass",
+	"NJets","JetTauID","JetPt","JetNChargedHad","JetNConst","JetNPhotons","JetNNeutralHad","NTauFromJets","CutFlow","dPhiTaus","dThetaTaus"]
 
 # las muestras : 
-sampleName=["p8_ee_ZZ_ecm240", "p8_ee_WW_ecm240","wzp6_ee_mumuH_ecm240","wzp6_ee_mumuH_Htautau_ecm240"]
-legendName=["ZZ","WW","mumuH","mumuH_Htautau"]
+sampleName=["p8_ee_ZZ_ecm240", "p8_ee_WW_ecm240","wzp6_ee_mumuH_Hbb_ecm240","wzp6_ee_mumuH_HWW_ecm240","wzp6_ee_mumuH_Htautau_ecm240"]
+legendName=["ZZ","WW","mumuH_Hbb","mumuH_HWW","mumuH_Htautau"]
 nProcesses=len(sampleName)
 
 # Los factores de normalizacion de cada proceso vienen dados por la seccion eficaz:
@@ -42,7 +42,7 @@ nProcesses=len(sampleName)
 # Referencia:
 # http://fcc-physics-events.web.cern.ch/fcc-physics-events/FCCee/winter2023/Delphesevents_IDEA.php
 
-xsection=[1.35899,16.4385,0.0067643,0.0004243]
+xsection=[1.35899,16.4385,0.00394,0.001456,0.0004243]
 # Comentario a mi misma: para que esto sea mas elegante y cause menos errores tontos, seria
 # muchisimo mejor hacer un mapa o un diccionario (muestra-> seccion eficaz) 
 
@@ -53,6 +53,7 @@ luminosity = 5e6
 totalNumberOfEvents=[0]*nProcesses
 for a in range(0,nProcesses):
      cutflowName="CutFlow_"+sampleName[a]
+     print(cutflowName)
      cfHisto=file.Get(cutflowName)      
      totalNumberOfEvents[a]=cfHisto.GetBinContent(0)
      print (sampleName[a],xsection[a],totalNumberOfEvents[a])
@@ -62,7 +63,7 @@ for a in range(0,nProcesses):
 #  Peso      = xsection * luminosidad / SucesosGenerados en total 
 
 # Color de los histogramas. Esto tambien deberia ir a un JSON/Diccionario
-color=[ROOT.kGreen+2,ROOT.kBlue,ROOT.kBlack,ROOT.kPink+2,ROOT.kBlue+2,ROOT.kViolet]
+color=[ROOT.kGreen+2,ROOT.kBlue,ROOT.kViolet,ROOT.kBlue+2,ROOT.kPink]
 
 # Definimos una funcion para dar estilo y normalizar los histogramas  
 def StyleHisto(sample,variab,label,histColor,xsec,totalEvents,suffix=""):
@@ -90,8 +91,8 @@ for histoName in histos:
    for i in range(nProcesses):
          h[ legendName[i] ] = StyleHisto(sampleName[i],histoName,legendName[i],color[i],xsection[i],totalNumberOfEvents[i])
          print ("... %s %2d" %(sampleName[i],h[ legendName[i] ].Integral() ) )
-         if legendName[i]!="mumuH_Htautau" : # annade solo uno entre mumuH y mumuH_Htautau 
-          hStack.Add( h[ legendName[i] ] )
+#         if legendName[i]!="mumuH_Htautau" : # annade solo uno entre mumuH y mumuH_Htautau 
+         hStack.Add( h[ legendName[i] ] )
 
 
    # Ahora pintamos los histogramas:
@@ -107,7 +108,7 @@ for histoName in histos:
    c1.SetTopMargin(0.06)
   
    hStack.Draw("hist")
-   h["mumuH_Htautau"].Draw("hist,sames")	# Opcion para pintar la segnal por separado
+#   h["mumuH_Htautau"].Draw("hist,sames")	# Opcion para pintar la segnal por separado
  
    ylabel="events"
    xlabel=h[legendName[0]].GetXaxis().GetTitle() #"DiMuon Mass [GeV]"
@@ -133,7 +134,7 @@ for histoName in histos:
    
    # Etiquetas explicando las condiciones del proceso
    text = "#sqrt{{s}} = 240 GeV,   L = {:.0f} ab^{{-1}}".format(luminosity/1e6)
-   channel = 'e^{+}e^{-} #rightarrow ZH #rightarrow #mu^{+}#mu^{-} + #tau^{+}_{h}#tau^{-}_{h}'
+   channel = 'e^{+}e^{-} #rightarrow ZH #rightarrow #mu^{+}#mu^{-} + #tau^{+}_{e}#tau^{-}_{h}'
    
    Text = ROOT.TLatex()
    Text.SetNDC()

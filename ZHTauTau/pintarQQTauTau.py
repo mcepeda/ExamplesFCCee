@@ -6,7 +6,7 @@ tdrstyle.setTDRStyle()
 
 # Carga el archivo con los histogramas
 
-file=ROOT.TFile("histos.root","READONLY")
+file=ROOT.TFile("histosQQTauTau.root","READONLY")
 
 #histos=["Z_mass","Recoil_mass","LeadMuon_Pt","LeadMuon_Theta","LeadMuon_Phi",\
 #	"SecondMuon_Pt","SecondMuon_Theta","SecondMuon_Phi","Z_theta","Recoil_theta",\
@@ -15,18 +15,18 @@ file=ROOT.TFile("histos.root","READONLY")
 
 histos=["Recoil_mass","DiTau_coll_mass","CutFlow"] # para ir rapido, solo un plot
 
-#histos=["Z_mass","Recoil_mass","DiTau_vis_mass","DiTau_coll_mass","LeadJet_Pt","SecondJet_Pt","LeadJet_Theta","SecondJet_Theta",
-#	"LeadJet_Phi","SecondJet_Phi","LeadTau_Pt","SecondTau_Pt","LeadTau_Theta","SecondTau_Theta","LeadTau_Phi","SecondTau_Phi",
-#        "Z_Pt","DiTau_Pt","Recoil_Pt","Z_y","Recoil_y","Z_theta","Recoil_theta","NMuons","NTaus","NElectrons","cos_missing_theta",
-#	"LeadTau_Type","LeadTau_Mass","SecondTau_Type","SecondTau_Mass",
-#	"NJets","JetTauID","JetPt","JetNChargedHad","JetNConst","JetNPhotons","JetNNeutralHad","NTauFromJets","CutFlow","dPhiTaus","dPhiJets","dThetaTaus","dThetaJets","IsTauTauGen" ]
+histos=["Z_mass","Recoil_mass","DiTau_vis_mass","DiTau_coll_mass","LeadJet_Pt","SecondJet_Pt","LeadJet_Theta","SecondJet_Theta",
+	"LeadJet_Phi","SecondJet_Phi","LeadTau_Pt","SecondTau_Pt","LeadTau_Theta","SecondTau_Theta","LeadTau_Phi","SecondTau_Phi",
+        "Z_Pt","DiTau_Pt","Recoil_Pt","Z_y","Recoil_y","Z_theta","Recoil_theta","NMuons","NTaus","NElectrons","cos_missing_theta",
+	"LeadTau_Type","LeadTau_Mass","SecondTau_Type","SecondTau_Mass",
+	"NJets","JetTauID","JetPt","JetNChargedHad","JetNConst","JetNPhotons","JetNNeutralHad","NTauFromJets","CutFlow","dPhiTaus","dPhiJets","dThetaTaus","dThetaJets","IsTauTauGen" ]
 
 # las muestras : 
 
 sampleName=["p8_ee_WW_ecm240", "p8_ee_ZZ_ecm240",
-"wzp6_ee_uuHorddH_Htautau_ecm240",'wzp6_ee_bbH_Htautau_ecm240', 'wzp6_ee_ssH_Htautau_ecm240', 'wzp6_ee_ccH_Htautau_ecm240',
-"wzp6_ee_qqH_ecm240"]
-legendName=["WW","ZZ","uuH/ddH_Htautau","bbH_Htautau","ssH_Htautau","ccH_Htautau","qqH"]
+"wzp6_ee_uuHorddH_Htautau_ecm240",'wzp6_ee_bbH_Htautau_ecm240',
+'wzp6_ee_ssH_Htautau_ecm240', 'wzp6_ee_ccH_Htautau_ecm240'] #"wzp6_ee_qqH_ecm240"]
+legendName=["WW","ZZ","uuH/ddH_Htautau","bbH_Htautau","ssH_Htautau","ccH_Htautau"]#,"qqH"]
 nProcesses=len(sampleName)
 
 # Los factores de normalizacion de cada proceso vienen dados por la seccion eficaz:
@@ -96,8 +96,8 @@ for histoName in histos:
          h[ legendName[i] ] = StyleHisto(sampleName[i],histoName,legendName[i],color[i],xsection[i],totalNumberOfEvents[i])
          print ("... %s %2d" %(sampleName[i],h[ legendName[i] ].Integral() ) )
 #         if legendName[i]!="qqH_Htautau" or legendName[i]!="qqH_Hbb": # para pintar la señal por separado
-         if "H_Htautau"  not in legendName[i]: 
-           hStack.Add( h[ legendName[i] ] )
+#         if "H_Htautau"  not in legendName[i]: 
+         hStack.Add( h[ legendName[i] ] )
 
 
    # Ahora pintamos los histogramas:
@@ -113,9 +113,9 @@ for histoName in histos:
    c1.SetTopMargin(0.06)
   
    hStack.Draw("hist")
-   for i in range(nProcesses):
-     if "H_Htautau"  in legendName[i]: 
-      h[legendName[i]].Draw("hist,sames")	# Opcion para pintar la segnal por separado
+#   for i in range(nProcesses):
+#     if "H_Htautau"  in legendName[i]: 
+#      h[legendName[i]].Draw("hist,sames")	# Opcion para pintar la segnal por separado
  
    ylabel="events"
    xlabel=h[legendName[0]].GetXaxis().GetTitle() #"DiMuon Mass [GeV]"
@@ -127,8 +127,8 @@ for histoName in histos:
    hStack.GetXaxis().SetTitleOffset(1.2)
 
    maxY=hStack.GetMaximum()
-   if h["qqH"].GetMaximum()> maxY:
-      maxY=h["qqH"].GetMaximum() 
+#   if h["qqH"].GetMaximum()> maxY:
+#      maxY=h["qqH"].GetMaximum() 
    hStack.SetMaximum(maxY*1.2)
  
    # Leyenda

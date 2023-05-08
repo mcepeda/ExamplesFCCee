@@ -19,7 +19,7 @@ usecpus = max(ROOT.GetThreadPoolSize(),1)
 # Archivos de entrada
 # Los archivos estan en 'path'. Vamos a usar tres archivos, X_skimmed_reduced.root, donde X = eeHZ
 # (sennal) +  eeZZ,  eeWW (fondos)
-sampleName=["wzp6_ee_mumuH_Htautau_ecm240","wzp6_ee_mumuH_ecm240","wzp6_ee_qqH_ecm240","wzp6_ee_tautauH_ecm240","p8_ee_ZZ_ecm240","p8_ee_WW_ecm240"]
+sampleName=["wzp6_ee_mumuH_Htautau_ecm240","wzp6_ee_mumuH_HWW_ecm240", "wzp6_ee_mumuH_Hbb_ecm240","wzp6_ee_mumuH_ecm240","wzp6_ee_qqH_ecm240","wzp6_ee_tautauH_ecm240","p8_ee_ZZ_ecm240","p8_ee_WW_ecm240"]
 nProcesses=len(sampleName)
 #path = "/afs/ciemat.es/user/a/alcaraz/public/FCCee/"
 #path="files/"
@@ -66,23 +66,30 @@ ROOT.gInterpreter.Declare("""
    ROOT::VecOps::RVec<int> FindBest(ROOT::VecOps::RVec<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzM4D<double>>> P4vector, double mass){ 
 
         double minDistance=10000;
-        int lead=-1;
-        int second=-1;
+        int dau1=-1;
+        int dau2=-1;
 
         for (int i=0; i<P4vector.size(); i++){
                 for (int j=i+1; j<P4vector.size(); j++){
                         ROOT::Math::PxPyPzMVector DiObj=P4vector[i]+P4vector[j];
                         if ( fabs(DiObj.M()-mass)<minDistance) {
                                         minDistance=fabs(DiObj.M()-mass);
-                                        lead=i;
-                                        second=j; 
+                                        dau1=i;
+                                        dau2=j; 
                         }
         }
         }
+       int third=-1; double ptThird=0;
+   
+       for (int i=0; i<P4vector.size(); i++){
+		if (i==dau1 || i==dau2) continue;
+		if(P4vector[i].Pt()>ptThird) { ptThird=P4vector[i].Pt(); third=i;}
+       }
 
   ROOT::VecOps::RVec<int> idx;
-  idx.push_back(lead);
-  idx.push_back(second); 
+  idx.push_back(dau1);
+  idx.push_back(dau2); 
+  idx.push_back(third); 
 
   return idx;
   }     
@@ -100,9 +107,9 @@ for i in range(nProcesses):
     df[p] = df[p].Define("genpart_idx","Nonzero(GenPart_PDG)")
     df[p] = df[p].Define("selGenTauHad_idx","genpart_idx[abs(GenPart_PDG)==15&&GenPart_type>=0]") 
     df[p] = df[p].Define("GenTauHad_p4","Take(GenPart_VisP4,selGenTauHad_idx)")
-    df[p] = df[p].Define("selGenTauMu_idx","genpart_idx[abs(GenPart_PDG)==15&&GenPart_type==-13]") 
+    df[p] = df[p].Define("selGenTauMu_idx","genpart_idx[abs(GenPart_PDG)==15&&GenPart_type==-13]")
     df[p] = df[p].Define("GenTauMu_p4","Take(GenPart_VisP4,selGenTauMu_idx)")
-    df[p] = df[p].Define("selGenTauEle_idx","genpart_idx[abs(GenPart_PDG)==15&&GenPart_type==-11]") 
+    df[p] = df[p].Define("selGenTauEle_idx","genpart_idx[abs(GenPart_PDG)==15&&GenPart_type==-11]")
     df[p] = df[p].Define("GenTauEle_p4","Take(GenPart_VisP4,selGenTauEle_idx)")
     df[p] = df[p].Define("NGenTauHad","(Int_t)GenTauHad_p4.size()")
     df[p] = df[p].Define("NGenTauMu","(Int_t)GenTauMu_p4.size()")
@@ -111,16 +118,27 @@ for i in range(nProcesses):
 #    df[p] = df[p].Filter("NGenTauHad==2","Only Tau_h Tau_h")  # Para calcular la
 #    aceptancia/efficiencia *solo* para sucesos HTauTau hadronico
 
+    df[p] = df[p].Define("higgsDaugh_idx","genpart_idx[ GenPart_momPDG==25]")
+    df[p] = df[p].Define("higgsDaugh_PDG","Take(GenPart_PDG,higgsDaugh_idx)")
+
+    df[p] = df[p].Define("zDaugh_idx","genpart_idx[ GenPart_momPDG==23 && GenPart_PDG!=23]")
+    df[p] = df[p].Define("zDaugh_PDG","Take(GenPart_PDG,zDaugh_idx)")
+
+
+
     # Para simplificar la seleccion, de momento vamos a mirar sucesos con exactamente dos
     # muones 
-    df[p] = df[p].Filter("NMuon >= 2", "Events with at least two muons")
-
-    df[p] = df[p].Filter("Muon_pt[0]>10&&Muon_pt[1]>10","Muon Pt>10")
+    df[p] = df[p].Filter("NMuon == 3", "Events with at two muons")
     df[p] = df[p].Define("Muon_p4","ROOT::VecOps::Construct<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzM4D<double>>>(Muon_px,Muon_py,Muon_pz,Muon_mass)")
-    df[p] = df[p].Filter("Muon_charge[0] != Muon_charge[1]", "Muons with opposite charge")
+    df[p] = df[p].Define("bestZ","FindBest(Muon_p4,91)")
+    df[p] = df[p].Define("Lead","bestZ[0]")
+    df[p] = df[p].Define("Second","bestZ[1]")
+    df[p] = df[p].Define("HiggsMuon","bestZ[2]")
+    df[p] = df[p].Filter("Muon_pt[Lead]>10&&Muon_pt[Second]>10","Muon Pt>10")
+    df[p] = df[p].Filter("Muon_charge[Lead] != Muon_charge[Second]", "Muons with opposite charge")
 
     # Reconstruimos el Z! Sumando los cuadrimomentos (p4)
-    df[p] = df[p].Define("DiMuon_p4","Muon_p4[0]+Muon_p4[1]")
+    df[p] = df[p].Define("DiMuon_p4","Muon_p4[Lead]+Muon_p4[Second]")
 
     # A estos p4 le podemos pedir directamente las variables que nos interesan, como la
     # masa:
@@ -154,41 +172,25 @@ for i in range(nProcesses):
 
     # Ahora vamos a buscar los Taus. Para hacer esto mejor podriamos comprobar el orden
     # Que funciona mejor, ordenar por pt? Por aislamiento? Cuantos Taus hay? 
-    df[p] = df[p].Filter("NTauFromJet == 2", "Events with exactly two taus")
+    df[p] = df[p].Filter("NTauFromJet == 1", "Events with exactly one tau")
+    df[p] = df[p].Filter("NElectron == 0", "Events with no electrons")
+
     df[p] = df[p].Define("Taus_p4","ROOT::VecOps::Construct<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzM4D<double>  > > ( TauFromJet_px,TauFromJet_py,TauFromJet_pz,TauFromJet_mass)")
-#    df[p] = df[p].Define("bestHiggs","FindBest(Taus_p4,125)")  # Me estoy quedando con
-#    solo dos taus, no hace falta esto
-    df[p] = df[p].Define("Lead","0")#bestHiggs[0]")
-    df[p] = df[p].Define("Second","1")#bestHiggs[1]")
-    df[p] = df[p].Define("TauLead_p4","Taus_p4[Lead]")
-    df[p] = df[p].Define("TauSecond_p4","Taus_p4[Second]")
+    df[p] = df[p].Define("TauLead_p4","Taus_p4[0]")
+    df[p] = df[p].Filter("TauFromJet_type[0]>=0", "Identified Tau")
+    df[p] = df[p].Filter("TauFromJet_pt[0]>10", "Tau Pt>10 GeV")
 
-    # Filtro en el pt de los taus
-    df[p] = df[p].Filter("TauFromJet_pt[Lead]>10 && TauFromJet_pt[Second]>10", "Tau Pt>10 GeV")
+    df[p] = df[p].Define("MuonHiggs_p4","Muon_p4[HiggsMuon]")
+    df[p] = df[p].Filter("MuonHiggs_p4.Pt()>5", "Muon Pt>5 GeV")
+
     # Carga opuesta
-    df[p] = df[p].Filter("TauFromJet_charge[Lead] != TauFromJet_charge[Second]", "Taus with opposite charge")
+    df[p] = df[p].Filter("TauFromJet_charge[0] != Electron_charge[0]", "Electron-Tau with opposite charge")
  
-    # Identificacion de taus: el algoritmo ahora mismo parte de un jet y busca en sus
-    # constituyentes patrones compatibles con h+ ó h+h-h+ (y sus conjuados en carga), más
-    # fotones. Los posibles tipos son:
-    # -13, -11 -> muones, electrones (no deberian aparecer en esta muestra)
-    # -1 -> jets con mas trazas (por ejemplo
-    # 0 -> h+ o h-
-    # 1 -> h+ + 1 fotón cercano (dTheta=0.15 con respecto a la traza)
-    # 2, 3,4,...  -> h+ + 2,3,4... fotones cercanos
-    # 10 -> h+h-h+ o h-h+h-
-    # 11 -> hhh + 1 fotón cercano (dTheta=0.15 con respecto a la traza)
-    # 12, 13, 14,...  -> hhh + 2,3,4... fotones cercanos
-    # Con este corte, nos quedamos solo con los buenos candidatos a tau:
-    df[p] = df[p].Filter("TauFromJet_type[Lead]>=0 && TauFromJet_type[Second]>=0",   "Identified Taus")
-
     # Reconstruimos el DiTau, Sumando los cuadrimomentos (p4)
-    df[p] = df[p].Define("DiTau_p4","Taus_p4[Lead]+Taus_p4[Second]")
+    df[p] = df[p].Define("DiTau_p4","TauLead_p4+MuonHiggs_p4")
 
-    df[p] = df[p].Define("TauLead_type","TauFromJet_type[Lead]")
-    df[p] = df[p].Define("TauSecond_type","TauFromJet_type[Second]")
-    df[p] = df[p].Define("TauLead_mass","TauFromJet_mass[Lead]")
-    df[p] = df[p].Define("TauSecond_mass","TauFromJet_mass[Second]")
+    df[p] = df[p].Define("TauLead_type","TauFromJet_type[0]")
+    df[p] = df[p].Define("TauLead_mass","TauFromJet_mass[0]")
 
     df[p] = df[p].Define("DiTau_vis_mass", "DiTau_p4.M()")
     df[p] = df[p].Define("DiTau_Pt", "DiTau_p4.Pt()")
@@ -197,12 +199,21 @@ for i in range(nProcesses):
     df[p] = df[p].Filter("DiTau_vis_mass>20", "DiTauMass > 20 GeV")
 
     #Aplicamos collinear approximation
-    df[p] = df[p].Define("p12","TauLead_p4.Py()*TauSecond_p4.Px()-TauLead_p4.Px()*TauSecond_p4.Py()")
+    df[p] = df[p].Define("p12","TauLead_p4.Py()*MuonHiggs_p4.Px()-TauLead_p4.Px()*MuonHiggs_p4.Py()")
     df[p] = df[p].Define("r0","abs((Missing_p4.Py()*TauLead_p4.Px()-Missing_p4.Px()*TauLead_p4.Py())/p12)")
     df[p] = df[p].Define("f0","1/(1+r0)")
-    df[p] = df[p].Define("r1","abs((Missing_p4.Py()*TauSecond_p4.Px()-Missing_p4.Px()*TauSecond_p4.Py())/p12)")
+    df[p] = df[p].Define("r1","abs((Missing_p4.Py()*MuonHiggs_p4.Px()-Missing_p4.Px()*MuonHiggs_p4.Py())/p12)")
     df[p] = df[p].Define("f1","1/(1+r1)")
     df[p] = df[p].Define("DiTau_coll_mass","DiTau_vis_mass/sqrt(f0*f1)")
+
+
+    df[p] = df[p].Define("DThetaTaus","abs(TauLead_p4.Theta()-MuonHiggs_p4.Theta())")
+    df[p] = df[p].Define("DPhiTaus","abs(ROOT::Math::VectorUtil::DeltaPhi(TauLead_p4,MuonHiggs_p4))")
+    #df[p] = df[p].Filter("DPhiTaus>1.5","DPhiTaus>1.5")
+
+    df[p] = df[p].Define("DThetaMuons","abs(Muon_p4[0].Theta()-Muon_p4[1].Theta())")
+    df[p] = df[p].Define("DPhiMuons","ROOT::Math::VectorUtil::DeltaPhi(Muon_p4[0],Muon_p4[1])")
+
 
     print("CutFlow for process", sampleName[i])
     allCutsReport[p]=df[p].Report()
@@ -231,17 +242,14 @@ hNElectrons={}
 hCosRecoilTheta={}
 hCosMissEtTheta={}
 hLeadTauPt={}
-hSecondTauPt={}
+hMuonHiggsPt={}
 hLeadTauTheta={}
-hSecondTauTheta={}
+hMuonHiggsTheta={}
 hLeadTauPhi={}
-hSecondTauPhi={}
+hMuonHiggsPhi={}
 hLeadTauMass={}
-hSecondTauMass={}
 hLeadTauType={}
-hSecondTauType={}
 hLeadTauIso={}
-hSecondTauIso={}
 hDiTauCollMass_Fine={}
 
 hNTauFromJets={}
@@ -256,6 +264,17 @@ hJetNPhotons={}
 
 fileCutFlow={}
 fileEff={}
+
+hTauTauEvent={}
+hHiggsDaugh_PDG={}
+hZDaugh_PDG={}
+
+hDPhiTaus={}
+hDPhiMuons={}
+hDThetaTaus={}
+hDThetaMuons={}
+
+
 
 # Rellenamos histogramas: 
 
@@ -289,16 +308,14 @@ for i in range(nProcesses):
    hLeadTauTheta[p] = df[p].Define("LeadTau_Theta","TauLead_p4.Theta()").Histo1D(("LeadTau_Theta_{}".format(p), "Lead Tau #theta; Lead #tau #theta;N_{Events}",50,0,3.16), "LeadTau_Theta")
    hLeadTauPhi[p] = df[p].Define("LeadTau_Phi","TauLead_p4.Phi()").Histo1D(("LeadTau_Phi_{}".format(p), "Lead Tau #phi; Lead #tau #phi;N_{Events}",50,-3.16,3.16), "LeadTau_Phi")
 
-   hSecondTauPt[p] = df[p].Define("SecondTau_Pt","TauSecond_p4.Pt()").Histo1D(("SecondTau_Pt_{}".format(p), "Second Tau Pt; Second #tau Pt (GeV);N_{Events}",60,0,120), "SecondTau_Pt")
-   hSecondTauTheta[p] = df[p].Define("SecondTau_Theta","TauSecond_p4.Theta()").Histo1D(("SecondTau_Theta_{}".format(p), "Second Tau #theta; Second #tau #theta;N_{Events}",50,0,3.16), "SecondTau_Theta")
-   hSecondTauPhi[p] = df[p].Define("SecondTau_Phi","TauSecond_p4.Phi()").Histo1D(("SecondTau_Phi_{}".format(p), "Second Tau #phi; Second #tau #phi;N_{Events}",50,-3.16,3.16), "SecondTau_Phi")
+   hMuonHiggsPt[p] = df[p].Define("MuonHiggs_Pt","MuonHiggs_p4.Pt()").Histo1D(("MuonHiggs_Pt_{}".format(p), "Second Tau Pt; Second #tau Pt (GeV);N_{Events}",60,0,120), "MuonHiggs_Pt")
+   hMuonHiggsTheta[p] = df[p].Define("MuonHiggs_Theta","MuonHiggs_p4.Theta()").Histo1D(("MuonHiggs_Theta_{}".format(p), "Second Tau #theta; Second #tau #theta;N_{Events}",50,0,3.16), "MuonHiggs_Theta")
+   hMuonHiggsPhi[p] = df[p].Define("MuonHiggs_Phi","MuonHiggs_p4.Phi()").Histo1D(("MuonHiggs_Phi_{}".format(p), "Second Tau #phi; Second #tau #phi;N_{Events}",50,-3.16,3.16), "MuonHiggs_Phi")
 
    hLeadTauType[p] = df[p].Histo1D(("LeadTau_Type_{}".format(p), "Lead Tau Type; Lead #tau Type;N_{Events}",15,0, 15), "TauLead_type")
-   hSecondTauType[p] = df[p].Histo1D(("SecondTau_Type_{}".format(p), "Second Tau Type; Second #tau Type;N_{Events}",15,0, 15), "TauSecond_type")
-   hLeadTauMass[p] = df[p].Histo1D(("LeadTau_Mass_{}".format(p), "Lead Tau Mass; Lead #tau Mass;N_{Events}",100,0, 2), "TauLead_mass")
-   hSecondTauMass[p] = df[p].Histo1D(("SecondTau_Mass_{}".format(p), "Second Tau Mass; Second #tau Mass;N_{Events}",100,0, 2), "TauSecond_mass")
+   hLeadTauMass[p] = df[p].Histo1D(("LeadTau_Mass_{}".format(p), "Lead Tau Mass; Lead #tau Mass;N_{Events}",100,0, 4), "TauLead_mass")
 #   hLeadTauIso[p] = df[p].Histo1D(("LeadTau_Iso_{}".format(p), "Lead Tau Iso; Lead #tau Iso;N_{Events}",100,0, 2), "TauLead_iso")
-#   hSecondTauIso[p] = df[p].Histo1D(("SecondTau_Iso_{}".format(p), "Second Tau Iso; Second #tau Iso;N_{Events}",100,0, 2), "TauSecond_iso")
+#   hMuonHiggsIso[p] = df[p].Histo1D(("MuonHiggs_Iso_{}".format(p), "Second Tau Iso; Second #tau Iso;N_{Events}",100,0, 2), "MuonHiggs_iso")
 
    hZRapidity[p] = df[p].Define("Z_y","DiMuon_p4.Rapidity()").Histo1D(("Z_y_{}".format(p), "Dimuon Rapidity; Z y;N_{Events}",50,-2,2), "Z_y")
    hRecoilRapidity[p] = df[p].Define("recoil_y","(p4total-DiMuon_p4).Rapidity()").Histo1D(("Recoil_y_{}".format(p),"Recoil Rapidity; Recoil y;N_{Events}",50,-2,2), "recoil_y")
@@ -320,10 +337,23 @@ for i in range(nProcesses):
    hJetNNeutralHad[p] = df[p].Histo1D(("JetNNeutralHad_{}".format(p), "JetNNeutralHad; JetNNeutralHad;N_{Events}",10,0,10), "JetReRun_nneutralhad")
    hJetNPhotons[p] = df[p].Histo1D(("JetNPhotons_{}".format(p), "JetNPhotons; JetNPhotons;N_{Events}",10,0,10), "JetReRun_nphoton")
 
+   hTauTauEvent[p] = df[p].Histo1D(("IsTauTauGen_{}".format(p), "Check Gen TauTau; Tau_h Tau_h Check; N_{Events}",2,0,1),"NGenTauHad")
+   hHiggsDaugh_PDG[p] = df[p].Histo1D(("HiggsGenDaughter_{}".format(p), "Check Higgs Decay; Higgs Daughter; N_{Events}",51,-25,25),"higgsDaugh_PDG")
+   hZDaugh_PDG[p] = df[p].Histo1D(("ZGenDaughter_{}".format(p), "Check Z Decay; Z Daughter; N_{Events}",51,-25,25),"zDaugh_PDG")
+
+
+   hDPhiTaus[p]  =  df[p].Histo1D( ("dPhiTaus_{}".format(p),"DPhiTaus;#Delta #phi Taus;N_{Events}",100,0,3.2),"DPhiTaus")
+   hDPhiMuons[p]  =  df[p].Histo1D( ("dPhiMuons_{}".format(p),"DPhiMuons;#Delta #phi Muons;N_{Events}",100,0,3.2),"DPhiMuons")
+   hDThetaTaus[p]  = df[p].Histo1D(("dThetaTaus_{}".format(p),"DThetaTaus;#Delta #Theta Taus;N_{Events}",100,0,6.28),"DThetaTaus")
+   hDThetaMuons[p]  = df[p].Histo1D(("dThetaMuons_{}".format(p),"DThetaMuons;#Delta #Theta Muons;N_{Events}",100,0,6.28),"DThetaMuons")
+
+
+
+
 
 # Salva los histogramas en un archivo root para pintarlos despues 
 
-out = ROOT.TFile("histosMuMuTauTau.root","RECREATE")
+out = ROOT.TFile("histos.root","RECREATE")
 out.cd()
 
 for p in processes:
@@ -338,11 +368,11 @@ for p in processes:
    hLeadMuonPhi[p].Write()
    hSecondMuonPhi[p].Write()
    hLeadTauPt[p].Write()
-   hSecondTauPt[p].Write()
+   hMuonHiggsPt[p].Write()
    hLeadTauTheta[p].Write()
-   hSecondTauTheta[p].Write()
+   hMuonHiggsTheta[p].Write()
    hLeadTauPhi[p].Write()
-   hSecondTauPhi[p].Write()
+   hMuonHiggsPhi[p].Write()
    hZPt[p].Write()
    hDiTauPt[p].Write()
    hRecoilPt[p].Write()
@@ -355,9 +385,7 @@ for p in processes:
    hCosRecoilTheta[p].Write() 
    hCosMissEtTheta[p].Write()
    hLeadTauType[p].Write()
-   hSecondTauType[p].Write()
    hLeadTauMass[p].Write()
-   hSecondTauMass[p].Write()    
    hDiTauCollMass_Fine[p].Write()
    hJetTauID[p].Write()
    hNJets[p].Write()
@@ -367,6 +395,15 @@ for p in processes:
    hJetNChargedHad[p].Write()
    hJetNPhotons[p].Write()
    hJetNNeutralHad[p].Write()
+
+   hTauTauEvent[p].Write()
+   hHiggsDaugh_PDG[p].Write()
+   hZDaugh_PDG[p].Write()
+
+   hDThetaTaus[p].Write()
+   hDThetaMuons[p].Write()
+   hDPhiTaus[p].Write()
+   hDPhiMuons[p].Write()
 
 
    fileCutFlow[p]=ROOT.TH1D("CutFlow_"+p,"",15,0,15)
